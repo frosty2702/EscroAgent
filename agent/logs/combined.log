@@ -1,0 +1,48 @@
+2025-06-18 18:29:41 [INFO]: Blockchain service initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xDcE892624C1f5e96C7F9b795350ED0F68f4f679a",
+  "factoryAddress": "0x3f052A6793818DBAB89449874CAb0b119Ea7Ec82",
+  "network": "Base Sepolia"
+}
+2025-06-18 18:29:42 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-18 18:29:42 [INFO]: Blockchain service cleanup completed {
+  "service": "trustflow-agent"
+}
+2025-06-18 18:29:47 [INFO]: [STARTUP] Initializing TrustFlow Agent Service {
+  "service": "trustflow-agent"
+}
+2025-06-18 18:29:47 [INFO]: Blockchain service initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xDcE892624C1f5e96C7F9b795350ED0F68f4f679a",
+  "factoryAddress": "0x3f052A6793818DBAB89449874CAb0b119Ea7Ec82",
+  "network": "Base Sepolia"
+}
+2025-06-18 18:29:47 [INFO]: Event listeners setup successfully {
+  "service": "trustflow-agent"
+}
+2025-06-18 18:29:48 [INFO]: [STARTUP] Agent initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xDcE892624C1f5e96C7F9b795350ED0F68f4f679a",
+  "balance": "0.01 ETH",
+  "factoryContract": "0x3f052A6793818DBAB89449874CAb0b119Ea7Ec82"
+}
+2025-06-18 18:29:48 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-18 18:29:49 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-18 18:29:49 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-18 18:29:49 [INFO]: [STARTUP] Stopping agent service {
+  "service": "trustflow-agent"
+}
+2025-06-18 18:29:49 [INFO]: Blockchain service cleanup completed {
+  "service": "trustflow-agent"
+}
+2025-06-18 18:29:49 [INFO]: [STARTUP] Agent service stopped {
+  "service": "trustflow-agent"
+}

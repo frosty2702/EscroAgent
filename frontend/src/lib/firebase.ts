@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase/firestore';
 
 // Initialize Firebase
 const firebaseConfig = {
-  // @ts-ignore - These will be provided by the environment
+  // @ts-expect-error - These will be provided by the environment
   ...window.__firebase_config
 };
 

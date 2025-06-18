@@ -9,6 +9,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @dev Handles individual escrow agreements with conditional payments
  */
 contract Escrow is ReentrancyGuard, Ownable {
+    // Enum for agreement status
+    enum Status { Pending, Escrowed, Settled, Disputed }
+
     // Struct to store agreement details
     struct Agreement {
         address payer;
@@ -16,8 +19,9 @@ contract Escrow is ReentrancyGuard, Ownable {
         uint256 amount;
         uint256 conditionType; // 0: Date, 1: Task, 2: PR URL
         bytes32 conditionDetailsHash;
-        bool isSettled;
-        bool isDisputed;
+        Status status;
+        uint256 createdAt;
+        uint256 settledAt;
     }
 
     // State variables
@@ -27,9 +31,10 @@ contract Escrow is ReentrancyGuard, Ownable {
     uint256 public immutable x402payFeeAmount;
 
     // Events
-    event AgreementSettled(address indexed payer, address indexed payee, uint256 amount);
-    event DisputeInitiated(address indexed initiator, string reason);
-    event FundsReceived(address indexed payer, uint256 amount);
+    event AgreementSettled(address indexed payer, address indexed payee, uint256 amount, uint256 timestamp);
+    event DisputeInitiated(address indexed initiator, string reason, uint256 timestamp);
+    event FundsReceived(address indexed payer, uint256 amount, uint256 timestamp);
+    event StatusChanged(Status oldStatus, Status newStatus, uint256 timestamp);
 
     // Modifiers
     modifier onlyAgent() {
@@ -38,12 +43,20 @@ contract Escrow is ReentrancyGuard, Ownable {
     }
 
     modifier notSettled() {
-        require(!agreement.isSettled, "Agreement already settled");
+        require(agreement.status != Status.Settled, "Agreement already settled");
         _;
     }
 
     modifier notDisputed() {
-        require(!agreement.isDisputed, "Agreement is disputed");
+        require(agreement.status != Status.Disputed, "Agreement is disputed");
+        _;
+    }
+
+    modifier onlyParticipant() {
+        require(
+            msg.sender == agreement.payer || msg.sender == agreement.payee,
+            "Only payer or payee can call this function"
+        );
         _;
     }
 
@@ -81,8 +94,9 @@ contract Escrow is ReentrancyGuard, Ownable {
             amount: _amount,
             conditionType: _conditionType,
             conditionDetailsHash: _conditionDetailsHash,
-            isSettled: false,
-            isDisputed: false
+            status: Status.Pending,
+            createdAt: block.timestamp,
+            settledAt: 0
         });
 
         authorizedAgent = _authorizedAgent;
@@ -95,7 +109,9 @@ contract Escrow is ReentrancyGuard, Ownable {
      * @notice Transfers funds to payee and x402pay fee to designated address
      */
     function settle() external onlyAgent notSettled notDisputed nonReentrant {
-        agreement.isSettled = true;
+        Status oldStatus = agreement.status;
+        agreement.status = Status.Settled;
+        agreement.settledAt = block.timestamp;
         
         // Calculate amounts
         uint256 payeeAmount = agreement.amount - x402payFeeAmount;
@@ -107,21 +123,20 @@ contract Escrow is ReentrancyGuard, Ownable {
         (bool feeSuccess, ) = x402payFeeAddress.call{value: x402payFeeAmount}("");
         require(feeSuccess, "Transfer of fee failed");
 
-        emit AgreementSettled(agreement.payer, agreement.payee, agreement.amount);
+        emit StatusChanged(oldStatus, Status.Settled, block.timestamp);
+        emit AgreementSettled(agreement.payer, agreement.payee, agreement.amount, block.timestamp);
     }
 
     /**
      * @dev Allows payer or payee to initiate a dispute
      * @param reason Reason for the dispute
      */
-    function initiateDispute(string calldata reason) external notSettled {
-        require(
-            msg.sender == agreement.payer || msg.sender == agreement.payee,
-            "Only payer or payee can initiate dispute"
-        );
+    function initiateDispute(string calldata reason) external onlyParticipant notSettled {
+        Status oldStatus = agreement.status;
+        agreement.status = Status.Disputed;
         
-        agreement.isDisputed = true;
-        emit DisputeInitiated(msg.sender, reason);
+        emit StatusChanged(oldStatus, Status.Disputed, block.timestamp);
+        emit DisputeInitiated(msg.sender, reason, block.timestamp);
     }
 
     /**
@@ -130,7 +145,12 @@ contract Escrow is ReentrancyGuard, Ownable {
     receive() external payable {
         require(msg.sender == agreement.payer, "Only payer can send funds");
         require(msg.value == agreement.amount, "Incorrect amount sent");
-        emit FundsReceived(msg.sender, msg.value);
+        
+        Status oldStatus = agreement.status;
+        agreement.status = Status.Escrowed;
+        
+        emit StatusChanged(oldStatus, Status.Escrowed, block.timestamp);
+        emit FundsReceived(msg.sender, msg.value, block.timestamp);
     }
 
     /**
@@ -138,5 +158,38 @@ contract Escrow is ReentrancyGuard, Ownable {
      */
     function getBalance() external view returns (uint256) {
         return address(this).balance;
+    }
+
+    /**
+     * @dev Returns the current status of the agreement
+     */
+    function getStatus() external view returns (Status) {
+        return agreement.status;
+    }
+
+    /**
+     * @dev Returns the agreement details
+     */
+    function getAgreementDetails() external view returns (
+        address payer,
+        address payee,
+        uint256 amount,
+        uint256 conditionType,
+        bytes32 conditionDetailsHash,
+        Status status,
+        uint256 createdAt,
+        uint256 settledAt
+    ) {
+        Agreement memory a = agreement;
+        return (
+            a.payer,
+            a.payee,
+            a.amount,
+            a.conditionType,
+            a.conditionDetailsHash,
+            a.status,
+            a.createdAt,
+            a.settledAt
+        );
     }
 } 

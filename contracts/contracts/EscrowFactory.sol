@@ -12,6 +12,14 @@ contract EscrowFactory {
     address public immutable x402payFeeAddress;
     uint256 public immutable x402payFeeAmount;
     address public immutable authorizedAgent;
+    
+    // Track deployed escrow contracts
+    mapping(address => bool) public isEscrowContract;
+    address[] public deployedEscrows;
+    
+    // Statistics
+    uint256 public totalAgreements;
+    uint256 public totalVolume;
 
     // Events
     event AgreementCreated(
@@ -20,7 +28,15 @@ contract EscrowFactory {
         address indexed payee,
         uint256 amount,
         uint256 conditionType,
-        bytes32 conditionHash
+        bytes32 conditionHash,
+        uint256 timestamp
+    );
+
+    event FactoryInitialized(
+        address indexed x402payFeeAddress,
+        uint256 x402payFeeAmount,
+        address indexed authorizedAgent,
+        uint256 timestamp
     );
 
     /**
@@ -36,10 +52,18 @@ contract EscrowFactory {
     ) {
         require(_x402payFeeAddress != address(0), "Invalid fee address");
         require(_authorizedAgent != address(0), "Invalid agent address");
+        require(_x402payFeeAmount > 0, "Fee amount must be greater than 0");
         
         x402payFeeAddress = _x402payFeeAddress;
         x402payFeeAmount = _x402payFeeAmount;
         authorizedAgent = _authorizedAgent;
+
+        emit FactoryInitialized(
+            _x402payFeeAddress,
+            _x402payFeeAmount,
+            _authorizedAgent,
+            block.timestamp
+        );
     }
 
     /**
@@ -59,6 +83,7 @@ contract EscrowFactory {
         require(_payee != address(0), "Invalid payee address");
         require(_amount > 0, "Amount must be greater than 0");
         require(msg.value == _amount, "Incorrect amount sent");
+        require(_conditionType <= 2, "Invalid condition type"); // 0: Date, 1: Task, 2: PR URL
 
         // Deploy new Escrow contract
         Escrow escrow = new Escrow(
@@ -72,28 +97,63 @@ contract EscrowFactory {
             x402payFeeAmount
         );
 
+        escrowAddress = address(escrow);
+        
+        // Track the deployed contract
+        isEscrowContract[escrowAddress] = true;
+        deployedEscrows.push(escrowAddress);
+        
+        // Update statistics
+        totalAgreements++;
+        totalVolume += _amount;
+
         // Transfer funds to the new Escrow contract
-        (bool success, ) = address(escrow).call{value: _amount}("");
+        (bool success, ) = escrowAddress.call{value: _amount}("");
         require(success, "Transfer to escrow failed");
 
         // Emit event
         emit AgreementCreated(
-            address(escrow),
+            escrowAddress,
             msg.sender,
             _payee,
             _amount,
             _conditionType,
-            _conditionHash
+            _conditionHash,
+            block.timestamp
         );
 
-        return address(escrow);
+        return escrowAddress;
     }
 
     /**
      * @dev Returns the total number of agreements created
      * @return count Number of agreements
      */
-    function getAgreementCount() external view returns (uint256 count) {
-        return address(this).balance;
+    function getAgreementCount() external view returns (uint256) {
+        return totalAgreements;
+    }
+
+    /**
+     * @dev Returns the total volume of all agreements
+     * @return volume Total volume in wei
+     */
+    function getTotalVolume() external view returns (uint256) {
+        return totalVolume;
+    }
+
+    /**
+     * @dev Returns all deployed escrow contracts
+     * @return Array of deployed escrow contract addresses
+     */
+    function getDeployedEscrows() external view returns (address[] memory) {
+        return deployedEscrows;
+    }
+
+    /**
+     * @dev Returns the number of deployed escrow contracts
+     * @return count Number of deployed contracts
+     */
+    function getDeployedEscrowsCount() external view returns (uint256) {
+        return deployedEscrows.length;
     }
 } 

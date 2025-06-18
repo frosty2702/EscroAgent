@@ -2,6 +2,7 @@ const { ethers } = require('ethers');
 const config = require('../config');
 const { ESCROW_FACTORY_ABI, ESCROW_ABI } = require('../contracts/abis');
 const logger = require('./logger');
+const ValidationService = require('./validationService');
 
 class BlockchainService {
   constructor() {
@@ -9,6 +10,9 @@ class BlockchainService {
     this.wallet = null;
     this.factoryContract = null;
     this.escrowContracts = new Map(); // Cache for escrow contract instances
+    this.validationService = new ValidationService();
+    this.maxGasPrice = ethers.parseUnits('100', 'gwei'); // 100 gwei max
+    this.gasBuffer = 1.2; // 20% gas buffer
   }
 
   async initialize() {
@@ -66,12 +70,15 @@ class BlockchainService {
 
   async getEscrowDetails(escrowAddress) {
     try {
+      // Validate input
+      this.validationService.validateAddress(escrowAddress, 'escrowAddress');
+      
       const contract = await this.getEscrowContract(escrowAddress);
       const details = await contract.getAgreementDetails();
       const status = await contract.getStatus();
       const balance = await contract.getBalance();
 
-      return {
+      const rawDetails = {
         escrowAddress,
         payer: details[0],
         payee: details[1],
@@ -85,6 +92,9 @@ class BlockchainService {
         // Status enum: 0=Pending, 1=Escrowed, 2=Settled, 3=Disputed
         statusText: this.getStatusText(Number(status))
       };
+
+      // Validate the retrieved data
+      return this.validationService.validateEscrowDetails(rawDetails);
     } catch (error) {
       logger.error('Failed to get escrow details', { 
         escrowAddress, 
@@ -96,6 +106,9 @@ class BlockchainService {
 
   async settleEscrow(escrowAddress) {
     try {
+      // Validate input
+      this.validationService.validateAddress(escrowAddress, 'escrowAddress');
+      
       const contract = await this.getEscrowContract(escrowAddress);
       
       // Check current status before settling
@@ -111,40 +124,117 @@ class BlockchainService {
         payee: details.payee
       });
 
-      // Estimate gas
-      const gasEstimate = await contract.settle.estimateGas();
-      const gasLimit = gasEstimate * 120n / 100n; // Add 20% buffer
+      // Pre-flight validation: simulate the transaction
+      try {
+        await contract.settle.staticCall();
+        logger.info('Transaction simulation successful', { escrowAddress });
+      } catch (simulationError) {
+        logger.error('Transaction simulation failed', { 
+          escrowAddress, 
+          error: simulationError.message 
+        });
+        throw new Error(`Settlement would fail: ${simulationError.reason || simulationError.message}`);
+      }
 
-      // Execute settlement
-      const tx = await contract.settle({ gasLimit });
+      // Check agent balance
+      const agentBalance = await this.getAgentBalance();
+      const minBalance = ethers.parseEther('0.001'); // Minimum 0.001 ETH required
+      if (agentBalance.wei < minBalance) {
+        throw new Error(`Insufficient agent balance: ${agentBalance.eth} ETH (minimum 0.001 ETH required)`);
+      }
+
+      // Estimate gas with safety checks
+      let gasEstimate;
+      try {
+        gasEstimate = await contract.settle.estimateGas();
+        logger.info('Gas estimation successful', { 
+          escrowAddress, 
+          gasEstimate: gasEstimate.toString() 
+        });
+      } catch (gasError) {
+        logger.error('Gas estimation failed', { 
+          escrowAddress, 
+          error: gasError.message 
+        });
+        throw new Error(`Gas estimation failed: ${gasError.reason || gasError.message}`);
+      }
+
+      // Apply gas buffer and validate
+      const gasLimit = BigInt(Math.floor(Number(gasEstimate) * this.gasBuffer));
+      this.validationService.validateGasParams(gasLimit.toString(), null);
+
+      // Get current gas price and validate
+      const feeData = await this.provider.getFeeData();
+      const gasPrice = feeData.gasPrice;
+      
+      if (gasPrice > this.maxGasPrice) {
+        logger.warn('Gas price too high, using maximum allowed', {
+          currentGasPrice: ethers.formatUnits(gasPrice, 'gwei'),
+          maxGasPrice: ethers.formatUnits(this.maxGasPrice, 'gwei')
+        });
+      }
+
+      const finalGasPrice = gasPrice > this.maxGasPrice ? this.maxGasPrice : gasPrice;
+
+      // Calculate total transaction cost
+      const txCost = gasLimit * finalGasPrice;
+      if (agentBalance.wei < txCost) {
+        throw new Error(`Insufficient balance for transaction. Required: ${ethers.formatEther(txCost)} ETH, Available: ${agentBalance.eth} ETH`);
+      }
+
+      // Execute settlement with validated parameters
+      const txParams = {
+        gasLimit,
+        gasPrice: finalGasPrice
+      };
+
+      logger.info('Executing settlement transaction', {
+        escrowAddress,
+        gasLimit: gasLimit.toString(),
+        gasPrice: ethers.formatUnits(finalGasPrice, 'gwei') + ' gwei',
+        estimatedCost: ethers.formatEther(txCost) + ' ETH'
+      });
+
+      const tx = await contract.settle(txParams);
       
       logger.info('Settlement transaction sent', { 
         escrowAddress,
         txHash: tx.hash,
-        gasLimit: gasLimit.toString()
+        gasLimit: gasLimit.toString(),
+        gasPrice: ethers.formatUnits(finalGasPrice, 'gwei') + ' gwei'
       });
 
-      // Wait for confirmation
-      const receipt = await tx.wait();
+      // Wait for confirmation with timeout
+      const receipt = await Promise.race([
+        tx.wait(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Transaction timeout')), 300000) // 5 minute timeout
+        )
+      ]);
       
       logger.info('Escrow settled successfully', { 
         escrowAddress,
         txHash: receipt.hash,
         blockNumber: receipt.blockNumber,
-        gasUsed: receipt.gasUsed.toString()
+        gasUsed: receipt.gasUsed.toString(),
+        effectiveGasPrice: ethers.formatUnits(receipt.effectiveGasPrice, 'gwei') + ' gwei',
+        actualCost: ethers.formatEther(receipt.gasUsed * receipt.effectiveGasPrice) + ' ETH'
       });
 
       return {
         success: true,
         txHash: receipt.hash,
         blockNumber: receipt.blockNumber,
-        gasUsed: receipt.gasUsed.toString()
+        gasUsed: receipt.gasUsed.toString(),
+        effectiveGasPrice: receipt.effectiveGasPrice.toString(),
+        actualCost: ethers.formatEther(receipt.gasUsed * receipt.effectiveGasPrice)
       };
 
     } catch (error) {
       logger.error('Failed to settle escrow', { 
         escrowAddress, 
-        error: error.message 
+        error: error.message,
+        stack: error.stack
       });
       throw error;
     }

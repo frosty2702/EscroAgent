@@ -46,3 +46,15 @@
 2025-06-18 18:29:49 [INFO]: [STARTUP] Agent service stopped {
   "service": "trustflow-agent"
 }
+2025-06-18 21:09:14 [INFO]: Blockchain service initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xDcE892624C1f5e96C7F9b795350ED0F68f4f679a",
+  "factoryAddress": "0x3f052A6793818DBAB89449874CAb0b119Ea7Ec82",
+  "network": "Base Sepolia"
+}
+2025-06-18 21:09:15 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-18 21:09:15 [INFO]: Blockchain service cleanup completed {
+  "service": "trustflow-agent"
+}

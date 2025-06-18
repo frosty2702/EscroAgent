@@ -3,7 +3,7 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 import WalletConnection from '../components/WalletConnection';
-import CreateAgreementFormSimple from '../components/CreateAgreementFormSimple';
+import CreateAgreementForm from '../components/CreateAgreementForm';
 import ActiveAgreements from '../components/ActiveAgreements';
 
 export default function Home() {
@@ -31,7 +31,7 @@ export default function Home() {
         <WalletConnection />
 
         {/* Create New Agreement Form */}
-        <CreateAgreementFormSimple />
+        <CreateAgreementForm />
 
         {/* Active Agreements */}
         <ActiveAgreements />

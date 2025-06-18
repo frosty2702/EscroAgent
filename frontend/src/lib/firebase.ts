@@ -1,11 +1,15 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, signInWithCustomToken, signInAnonymously } from 'firebase/auth';
+import { getAuth, signInWithCustomToken, signInAnonymously as firebaseSignInAnonymously } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Initialize Firebase
+// Firebase configuration - these should be set in your environment
 const firebaseConfig = {
-  // @ts-expect-error - These will be provided by the environment
-  ...window.__firebase_config
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase only if it hasn't been initialized
@@ -20,7 +24,17 @@ export const signInWithToken = async (token: string) => {
   } catch (error) {
     console.error('Error signing in with custom token:', error);
     // Fallback to anonymous auth
-    await signInAnonymously(auth);
+    await firebaseSignInAnonymously(auth);
+  }
+};
+
+// Sign in anonymously (for demo purposes)
+export const signInAnonymously = async () => {
+  try {
+    await firebaseSignInAnonymously(auth);
+  } catch (error) {
+    console.error('Error signing in anonymously:', error);
+    throw error;
   }
 };
 

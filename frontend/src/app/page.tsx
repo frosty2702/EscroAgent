@@ -9,7 +9,7 @@ import ActiveAgreements from '../components/ActiveAgreements';
 export default function Home() {
   return (
     <div className="min-h-screen" style={{ 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+      backgroundColor: '#4A90E2' 
     }}>
       <div className="flex flex-col items-center py-10 px-4">
         {/* Header */}

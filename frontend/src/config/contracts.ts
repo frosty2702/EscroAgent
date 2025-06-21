@@ -1,5 +1,5 @@
 // Contract configuration for Base Sepolia
-export const ESCROW_FACTORY_ADDRESS = "0x3f052A6793818DBAB89449874CAb0b119Ea7Ec82";
+export const ESCROW_FACTORY_ADDRESS = "0x59bE47CeDe9Df251394A069A74F60E27902049f6";
 
 export const ESCROW_FACTORY_ABI = [
   {
@@ -18,10 +18,37 @@ export const ESCROW_FACTORY_ABI = [
         "internalType": "address",
         "name": "_authorizedAgent",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_x402payCreationFee",
+        "type": "uint256"
       }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
   },
   {
     "anonymous": false,
@@ -45,21 +72,25 @@ export const ESCROW_FACTORY_ABI = [
         "type": "address"
       },
       {
+        "indexed": false,
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
       },
       {
+        "indexed": false,
         "internalType": "uint256",
         "name": "conditionType",
         "type": "uint256"
       },
       {
+        "indexed": false,
         "internalType": "bytes32",
         "name": "conditionHash",
         "type": "bytes32"
       },
       {
+        "indexed": false,
         "internalType": "uint256",
         "name": "timestamp",
         "type": "uint256"
@@ -78,6 +109,7 @@ export const ESCROW_FACTORY_ABI = [
         "type": "address"
       },
       {
+        "indexed": false,
         "internalType": "uint256",
         "name": "x402payFeeAmount",
         "type": "uint256"
@@ -89,6 +121,13 @@ export const ESCROW_FACTORY_ABI = [
         "type": "address"
       },
       {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "x402payCreationFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "timestamp",
         "type": "uint256"
@@ -96,6 +135,57 @@ export const ESCROW_FACTORY_ABI = [
     ],
     "name": "FactoryInitialized",
     "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "oldFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "X402payCreationFeeUpdated",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "authorizedAgent",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [
@@ -129,19 +219,6 @@ export const ESCROW_FACTORY_ABI = [
       }
     ],
     "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "authorizedAgent",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -216,6 +293,19 @@ export const ESCROW_FACTORY_ABI = [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getX402payCreationFee",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -236,6 +326,26 @@ export const ESCROW_FACTORY_ABI = [
   },
   {
     "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "totalAgreements",
     "outputs": [
       {
@@ -250,6 +360,45 @@ export const ESCROW_FACTORY_ABI = [
   {
     "inputs": [],
     "name": "totalVolume",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_newCreationFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateX402payCreationFee",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "x402payCreationFee",
     "outputs": [
       {
         "internalType": "uint256",

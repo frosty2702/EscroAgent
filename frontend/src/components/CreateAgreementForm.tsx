@@ -27,8 +27,11 @@ import { parseEther, keccak256, toBytes } from 'viem';
 import { Timestamp } from 'firebase/firestore';
 import { ESCROW_FACTORY_ADDRESS, ESCROW_FACTORY_ABI } from '../config/contracts';
 import { useFirebase, AgreementData } from '../context/FirebaseContext';
-import { validateFormData } from '../utils/validation';
+import { validateDate } from '../utils/validation';
 import { parseBlockchainError } from '../utils/errorHandling';
+
+// x402pay Creation Fee Configuration
+const X402PAY_CREATION_FEE_ETH = 0.0005;
 
 interface FormData {
   payerAddress: string;
@@ -220,6 +223,8 @@ export default function CreateAgreementForm() {
       // Then create the smart contract
       const conditionHash = generateConditionHash();
       const amountWei = parseEther(formData.amount);
+      const creationFeeWei = parseEther(X402PAY_CREATION_FEE_ETH.toString());
+      const totalValueWei = amountWei + creationFeeWei;
 
       writeContract({
         address: ESCROW_FACTORY_ADDRESS,
@@ -231,7 +236,7 @@ export default function CreateAgreementForm() {
           BigInt(formData.conditionType),
           conditionHash
         ],
-        value: amountWei,
+        value: totalValueWei,
       });
 
     } catch (error) {
@@ -277,6 +282,15 @@ export default function CreateAgreementForm() {
               error={!!errors.amount}
               helperText={errors.amount || 'Amount to be held in escrow'}
             />
+            
+            <Alert severity="info" className="mt-2">
+              <Typography variant="body2">
+                <strong>Fee Breakdown:</strong><br/>
+                • Escrow Amount: {formData.amount || '0'} ETH<br/>
+                • x402pay Creation Fee: {X402PAY_CREATION_FEE_ETH} ETH<br/>
+                • <strong>Total Required: {formData.amount ? (parseFloat(formData.amount) + X402PAY_CREATION_FEE_ETH).toFixed(4) : X402PAY_CREATION_FEE_ETH} ETH</strong>
+              </Typography>
+            </Alert>
 
             <TextField
               label="Agreement Description"
@@ -348,9 +362,15 @@ export default function CreateAgreementForm() {
                     </Typography>
                   </Box>
                   <Box>
-                    <Typography variant="subtitle2" color="text.secondary">Amount</Typography>
+                    <Typography variant="subtitle2" color="text.secondary">Escrow Amount</Typography>
                     <Typography variant="body2" className="font-semibold">
                       {formData.amount} ETH
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">Creation Fee</Typography>
+                    <Typography variant="body2" className="font-semibold">
+                      {X402PAY_CREATION_FEE_ETH} ETH
                     </Typography>
                   </Box>
                   <Box>
@@ -359,6 +379,18 @@ export default function CreateAgreementForm() {
                       {CONDITION_TYPES[formData.conditionType].label}
                     </Typography>
                   </Box>
+                </Box>
+
+                <Divider className="my-4" />
+                
+                <Box className="bg-blue-50 p-4 rounded-lg">
+                  <Typography variant="subtitle2" color="text.secondary" className="mb-2">Total Transaction Cost</Typography>
+                  <Typography variant="h6" className="font-bold text-blue-900">
+                    {(parseFloat(formData.amount) + X402PAY_CREATION_FEE_ETH).toFixed(4)} ETH
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    This includes {formData.amount} ETH for escrow + {X402PAY_CREATION_FEE_ETH} ETH x402pay creation fee
+                  </Typography>
                 </Box>
 
                 <Divider className="my-4" />

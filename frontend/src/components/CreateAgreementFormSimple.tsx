@@ -22,6 +22,9 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { parseEther, keccak256, toBytes } from 'viem';
 import { ESCROW_FACTORY_ADDRESS, ESCROW_FACTORY_ABI } from '../config/contracts';
 
+// x402pay Creation Fee Configuration
+const X402PAY_CREATION_FEE_ETH = 0.0005;
+
 interface FormData {
   payerAddress: string;
   payeeAddress: string;
@@ -155,6 +158,8 @@ export default function CreateAgreementFormSimple() {
     try {
       const conditionHash = generateConditionHash();
       const amountWei = parseEther(formData.amount);
+      const creationFeeWei = parseEther(X402PAY_CREATION_FEE_ETH.toString());
+      const totalValueWei = amountWei + creationFeeWei;
 
       writeContract({
         address: ESCROW_FACTORY_ADDRESS,
@@ -166,7 +171,7 @@ export default function CreateAgreementFormSimple() {
           BigInt(formData.conditionType),
           conditionHash
         ],
-        value: amountWei,
+        value: totalValueWei,
       });
 
     } catch (error) {
@@ -346,7 +351,7 @@ export default function CreateAgreementFormSimple() {
                 onChange={(e) => handleInputChange('amount', e.target.value)}
                 placeholder="0.1"
                 error={!!errors.amount}
-                helperText={errors.amount}
+                helperText={errors.amount || `+ ${X402PAY_CREATION_FEE_ETH} ETH x402pay creation fee`}
               />
 
               <FormControl fullWidth size="small">
@@ -372,6 +377,17 @@ export default function CreateAgreementFormSimple() {
               </Typography>
               {renderConditionDetailsField()}
             </Box>
+
+            {/* Fee Breakdown */}
+            {formData.amount && (
+              <Alert severity="info">
+                <Typography variant="body2">
+                  <strong>Total Transaction Cost:</strong> {(parseFloat(formData.amount) + X402PAY_CREATION_FEE_ETH).toFixed(4)} ETH
+                  <br />
+                  ({formData.amount} ETH escrow + {X402PAY_CREATION_FEE_ETH} ETH x402pay creation fee)
+                </Typography>
+              </Alert>
+            )}
 
             {/* Agreement Description */}
             <TextField

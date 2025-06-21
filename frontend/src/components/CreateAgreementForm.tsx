@@ -27,7 +27,7 @@ import { parseEther, keccak256, toBytes } from 'viem';
 import { Timestamp } from 'firebase/firestore';
 import { ESCROW_FACTORY_ADDRESS, ESCROW_FACTORY_ABI } from '../config/contracts';
 import { useFirebase, AgreementData } from '../context/FirebaseContext';
-import { validateDate } from '../utils/validation';
+// import { validateDate } from '../utils/validation';
 import { parseBlockchainError } from '../utils/errorHandling';
 
 // x402pay Creation Fee Configuration

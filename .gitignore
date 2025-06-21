@@ -1,0 +1,5 @@
+agent/.env.local
+contracts/.env.contract
+*.env
+*.env.local
+*.env.contract

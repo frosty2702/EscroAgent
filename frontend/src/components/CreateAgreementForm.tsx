@@ -17,13 +17,15 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Divider
+  Divider,
+  FormHelperText
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain } from 'wagmi';
 import { parseEther, keccak256, toBytes } from 'viem';
+import { baseSepolia } from 'wagmi/chains';
 import { Timestamp } from 'firebase/firestore';
 import { ESCROW_FACTORY_ADDRESS, ESCROW_FACTORY_ABI } from '../config/contracts';
 import { useFirebase, AgreementData } from '../context/FirebaseContext';
@@ -59,6 +61,8 @@ const steps = ['Agreement Details', 'Condition Setup', 'Review & Submit'];
 
 export default function CreateAgreementForm() {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
   const { createAgreement, updateAgreement } = useFirebase();
   
   const [activeStep, setActiveStep] = useState(0);
@@ -108,54 +112,56 @@ export default function CreateAgreementForm() {
   const validateCurrentStep = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    switch (activeStep) {
-      case 0: // Agreement Details
-        if (!formData.payerAddress || !/^0x[a-fA-F0-9]{40}$/.test(formData.payerAddress)) {
-          newErrors.payerAddress = 'Valid Ethereum address required';
-        }
-        if (!formData.payeeAddress || !/^0x[a-fA-F0-9]{40}$/.test(formData.payeeAddress)) {
-          newErrors.payeeAddress = 'Valid Ethereum address required';
-        }
-        if (formData.payerAddress === formData.payeeAddress) {
-          newErrors.payeeAddress = 'Payee address must be different from payer address';
-        }
-        if (!formData.amount || parseFloat(formData.amount) <= 0) {
-          newErrors.amount = 'Amount must be greater than 0';
-        }
-        if (!formData.description.trim()) {
-          newErrors.description = 'Description is required';
+    // Validate basic required fields
+    if (!formData.payerAddress?.trim()) {
+      newErrors.payerAddress = 'Payer address is required';
+    } else if (!formData.payerAddress.startsWith('0x') || formData.payerAddress.length !== 42) {
+      newErrors.payerAddress = 'Please enter a valid Ethereum address';
+    }
+
+    if (!formData.payeeAddress?.trim()) {
+      newErrors.payeeAddress = 'Payee address is required';
+    } else if (!formData.payeeAddress.startsWith('0x') || formData.payeeAddress.length !== 42) {
+      newErrors.payeeAddress = 'Please enter a valid Ethereum address';
+    }
+
+    if (!formData.amount?.trim()) {
+      newErrors.amount = 'Amount is required';
+    } else if (parseFloat(formData.amount) <= 0) {
+      newErrors.amount = 'Amount must be greater than 0';
+    }
+
+    if (!formData.description?.trim()) {
+      newErrors.description = 'Agreement description is required';
+    }
+
+    // Validate condition-specific fields
+    switch (formData.conditionType) {
+      case 0: // Specific Date
+        if (!formData.settlementDate) {
+          newErrors.conditionDetails = 'Settlement date is required';
+        } else if (formData.settlementDate <= new Date()) {
+          newErrors.conditionDetails = 'Settlement date must be in the future';
         }
         break;
-
-      case 1: // Condition Setup
-        switch (formData.conditionType) {
-          case 0: // Specific Date
-            if (!formData.settlementDate) {
-              newErrors.conditionDetails = 'Settlement date is required';
-            } else if (formData.settlementDate <= new Date()) {
-              newErrors.conditionDetails = 'Settlement date must be in the future';
-            }
-            break;
-          case 1: // Task Completion
-            if (!formData.taskName?.trim()) {
-              newErrors.conditionDetails = 'Task name is required';
-            }
-            break;
-          case 2: // GitHub PR
-            if (!formData.githubPrUrl?.trim() || !formData.githubPrUrl.includes('github.com')) {
-              newErrors.conditionDetails = 'Valid GitHub PR URL is required';
-            }
-            break;
-          case 3: // API Call
-            if (!formData.apiEndpoint?.trim() || !formData.expectedValue?.trim()) {
-              newErrors.conditionDetails = 'API endpoint and expected value are required';
-            }
-            break;
-          case 4: // Custom Event
-            if (!formData.customEventName?.trim()) {
-              newErrors.conditionDetails = 'Custom event name is required';
-            }
-            break;
+      case 1: // Task Completion
+        if (!formData.taskName?.trim()) {
+          newErrors.conditionDetails = 'Task name is required';
+        }
+        break;
+      case 2: // GitHub PR
+        if (!formData.githubPrUrl?.trim() || !formData.githubPrUrl.includes('github.com')) {
+          newErrors.conditionDetails = 'Valid GitHub PR URL is required';
+        }
+        break;
+      case 3: // API Call
+        if (!formData.apiEndpoint?.trim() || !formData.expectedValue?.trim()) {
+          newErrors.conditionDetails = 'API endpoint and expected value are required';
+        }
+        break;
+      case 4: // Custom Event
+        if (!formData.customEventName?.trim()) {
+          newErrors.conditionDetails = 'Custom event name is required';
         }
         break;
     }
@@ -201,30 +207,70 @@ export default function CreateAgreementForm() {
   const handleSubmit = async () => {
     if (!validateCurrentStep() || !isConnected) return;
 
+    // Check if we're on the correct network (Base Sepolia)
+    if (chainId !== baseSepolia.id) {
+      try {
+        await switchChain({ chainId: baseSepolia.id });
+      } catch (error) {
+        console.error('Failed to switch network:', error);
+        setErrors({ submit: 'Please switch to Base Sepolia testnet in your wallet to create agreements.' });
+        return;
+      }
+    }
+
     try {
+      console.log('Starting agreement creation...');
+      console.log('Form data:', formData);
+      
       // First, save to Firestore
-      const agreementData: Omit<AgreementData, 'id' | 'createdAt' | 'status'> = {
+      const agreementData: any = {
         payerAddress: formData.payerAddress,
         payeeAddress: formData.payeeAddress,
         amount: parseFloat(formData.amount),
         conditionType: formData.conditionType,
         description: formData.description,
-        settlementDate: formData.settlementDate ? Timestamp.fromDate(formData.settlementDate) : undefined,
-        taskName: formData.taskName,
-        githubPrUrl: formData.githubPrUrl,
-        apiEndpoint: formData.apiEndpoint,
-        expectedValue: formData.expectedValue,
-        customEventName: formData.customEventName,
       };
 
+      // Only add optional fields if they have values (not undefined)
+      if (formData.settlementDate) {
+        agreementData.settlementDate = Timestamp.fromDate(formData.settlementDate);
+      }
+      if (formData.taskName) {
+        agreementData.taskName = formData.taskName;
+      }
+      if (formData.githubPrUrl) {
+        agreementData.githubPrUrl = formData.githubPrUrl;
+      }
+      if (formData.apiEndpoint) {
+        agreementData.apiEndpoint = formData.apiEndpoint;
+      }
+      if (formData.expectedValue) {
+        agreementData.expectedValue = formData.expectedValue;
+      }
+      if (formData.customEventName) {
+        agreementData.customEventName = formData.customEventName;
+      }
+
+      console.log('Saving to Firestore...', agreementData);
       const docId = await createAgreement(agreementData);
+      console.log('Firestore doc created:', docId);
       setFirestoreDocId(docId);
 
       // Then create the smart contract
+      console.log('Preparing blockchain transaction...');
       const conditionHash = generateConditionHash();
       const amountWei = parseEther(formData.amount);
       const creationFeeWei = parseEther(X402PAY_CREATION_FEE_ETH.toString());
       const totalValueWei = amountWei + creationFeeWei;
+
+      console.log('Transaction details:', {
+        payeeAddress: formData.payeeAddress,
+        amountWei: amountWei.toString(),
+        conditionType: formData.conditionType,
+        conditionHash,
+        totalValueWei: totalValueWei.toString(),
+        factoryAddress: ESCROW_FACTORY_ADDRESS
+      });
 
       writeContract({
         address: ESCROW_FACTORY_ADDRESS,
@@ -239,197 +285,27 @@ export default function CreateAgreementForm() {
         value: totalValueWei,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating agreement:', error);
-      setErrors({ submit: 'Failed to create agreement. Please try again.' });
-    }
-  };
-
-  const renderStepContent = (step: number) => {
-    switch (step) {
-      case 0:
-        return (
-          <Box className="flex flex-col gap-4">
-            <TextField
-              label="Payer Address (Your Address)"
-              fullWidth
-              value={formData.payerAddress}
-              onChange={(e) => handleInputChange('payerAddress', e.target.value)}
-              placeholder="0x..."
-              error={!!errors.payerAddress}
-              helperText={errors.payerAddress || 'This is automatically filled with your connected wallet address'}
-              disabled={isConnected}
-            />
-
-            <TextField
-              label="Payee Address"
-              fullWidth
-              value={formData.payeeAddress}
-              onChange={(e) => handleInputChange('payeeAddress', e.target.value)}
-              placeholder="0x..."
-              error={!!errors.payeeAddress}
-              helperText={errors.payeeAddress || 'The address that will receive the funds when conditions are met'}
-            />
-
-            <TextField
-              label="Amount (ETH)"
-              fullWidth
-              type="number"
-              inputProps={{ step: '0.001', min: '0' }}
-              value={formData.amount}
-              onChange={(e) => handleInputChange('amount', e.target.value)}
-              placeholder="0.1"
-              error={!!errors.amount}
-              helperText={errors.amount || 'Amount to be held in escrow'}
-            />
-            
-            <Alert severity="info" className="mt-2">
-              <Typography variant="body2">
-                <strong>Fee Breakdown:</strong><br/>
-                • Escrow Amount: {formData.amount || '0'} ETH<br/>
-                • x402pay Creation Fee: {X402PAY_CREATION_FEE_ETH} ETH<br/>
-                • <strong>Total Required: {formData.amount ? (parseFloat(formData.amount) + X402PAY_CREATION_FEE_ETH).toFixed(4) : X402PAY_CREATION_FEE_ETH} ETH</strong>
-              </Typography>
-            </Alert>
-
-            <TextField
-              label="Agreement Description"
-              fullWidth
-              multiline
-              rows={3}
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Describe what this agreement is for..."
-              error={!!errors.description}
-              helperText={errors.description || 'A clear description of the agreement terms'}
-            />
-          </Box>
-        );
-
-      case 1:
-        return (
-          <Box className="flex flex-col gap-4">
-            <FormControl fullWidth>
-              <InputLabel>Condition Type</InputLabel>
-              <Select
-                value={formData.conditionType}
-                label="Condition Type"
-                onChange={(e) => handleInputChange('conditionType', e.target.value as number)}
-              >
-                {CONDITION_TYPES.map((type) => (
-                  <MenuItem key={type.value} value={type.value}>
-                    <Box>
-                      <Typography variant="body1">{type.label}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {type.description}
-                      </Typography>
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Divider />
-
-            <Typography variant="h6" className="font-medium">
-              Condition Details
-            </Typography>
-
-            {renderConditionDetailsField()}
-          </Box>
-        );
-
-      case 2:
-        return (
-          <Box className="flex flex-col gap-4">
-            <Typography variant="h6" className="font-medium">
-              Review Your Agreement
-            </Typography>
-
-            <Card variant="outlined">
-              <CardContent>
-                <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">Payer</Typography>
-                    <Typography variant="body2" className="font-mono">
-                      {formData.payerAddress}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">Payee</Typography>
-                    <Typography variant="body2" className="font-mono">
-                      {formData.payeeAddress}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">Escrow Amount</Typography>
-                    <Typography variant="body2" className="font-semibold">
-                      {formData.amount} ETH
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">Creation Fee</Typography>
-                    <Typography variant="body2" className="font-semibold">
-                      {X402PAY_CREATION_FEE_ETH} ETH
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">Condition</Typography>
-                    <Typography variant="body2">
-                      {CONDITION_TYPES[formData.conditionType].label}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Divider className="my-4" />
-                
-                <Box className="bg-blue-50 p-4 rounded-lg">
-                  <Typography variant="subtitle2" color="text.secondary" className="mb-2">Total Transaction Cost</Typography>
-                  <Typography variant="h6" className="font-bold text-blue-900">
-                    {(parseFloat(formData.amount) + X402PAY_CREATION_FEE_ETH).toFixed(4)} ETH
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    This includes {formData.amount} ETH for escrow + {X402PAY_CREATION_FEE_ETH} ETH x402pay creation fee
-                  </Typography>
-                </Box>
-
-                <Divider className="my-4" />
-
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Description</Typography>
-                  <Typography variant="body2">{formData.description}</Typography>
-                </Box>
-
-                {renderConditionSummary()}
-              </CardContent>
-            </Card>
-
-            {errors.submit && (
-              <Alert severity="error">{errors.submit}</Alert>
-            )}
-
-            {writeError && (
-              <Alert severity="error">
-                {parseBlockchainError(writeError).message}
-              </Alert>
-            )}
-
-            {receiptError && (
-              <Alert severity="error">
-                Transaction failed: {receiptError.message}
-              </Alert>
-            )}
-
-            {isSuccess && (
-              <Alert severity="success">
-                Agreement created successfully! Transaction hash: {hash}
-              </Alert>
-            )}
-          </Box>
-        );
-
-      default:
-        return null;
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to create agreement. ';
+      
+      if (error?.message?.includes('insufficient funds')) {
+        errorMessage += 'Insufficient funds. Make sure you have enough ETH for the escrow amount plus gas fees.';
+      } else if (error?.message?.includes('user rejected')) {
+        errorMessage += 'Transaction was rejected. Please try again.';
+      } else if (error?.message?.includes('network')) {
+        errorMessage += 'Network error. Please check your connection and try again.';
+      } else if (error?.message?.includes('Firestore') || error?.code?.includes('firestore')) {
+        errorMessage += 'Database error. Please try again later.';
+      } else if (error?.message) {
+        errorMessage += `Error: ${error.message}`;
+      } else {
+        errorMessage += 'Please check the browser console for details and try again.';
+      }
+      
+      setErrors({ submit: errorMessage });
     }
   };
 
@@ -521,93 +397,284 @@ export default function CreateAgreementForm() {
     }
   };
 
-  const renderConditionSummary = () => {
-    let summary = '';
-    switch (formData.conditionType) {
-      case 0:
-        summary = `Funds will be released on ${formData.settlementDate?.toLocaleDateString()}`;
-        break;
-      case 1:
-        summary = `Funds will be released when task "${formData.taskName}" is completed`;
-        break;
-      case 2:
-        summary = `Funds will be released when PR ${formData.githubPrUrl} is merged`;
-        break;
-      case 3:
-        summary = `Funds will be released when ${formData.apiEndpoint} returns "${formData.expectedValue}"`;
-        break;
-      case 4:
-        summary = `Funds will be released when event "${formData.customEventName}" is triggered`;
-        break;
-    }
-
-    return (
-      <Box className="mt-4">
-        <Typography variant="subtitle2" color="text.secondary">Condition Summary</Typography>
-        <Typography variant="body2" className="italic">{summary}</Typography>
-      </Box>
-    );
-  };
-
   if (!isConnected) {
     return (
-      <Card className="w-full max-w-4xl">
-        <CardContent>
-          <Alert severity="warning">
-            Please connect your wallet to create an agreement.
-          </Alert>
-        </CardContent>
-      </Card>
+      <Box className="text-center py-12">
+        <Typography variant="h6" className="text-gray-600 mb-4" style={{ fontFamily: 'var(--font-doppio-one)' }}>
+          Please connect your wallet to create an agreement.
+        </Typography>
+      </Box>
     );
   }
 
+  // Check if user is on the wrong network
+  const isWrongNetwork = chainId !== baseSepolia.id;
+
   return (
-    <Card className="w-full max-w-4xl">
-      <CardContent>
-        <Typography variant="h5" className="font-bold mb-6">
-          Create New Agreement
-        </Typography>
+    <Box className="max-w-4xl mx-auto" sx={{ 
+      '& .MuiInputBase-root, & .MuiFormHelperText-root, & .MuiMenuItem-root': { 
+        fontFamily: 'var(--font-doppio-one)' 
+      },
+      '& .MuiInputBase-input': {
+        fontSize: '1rem',
+        padding: '18px 14px'
+      },
+      '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+          borderWidth: '2px',
+          borderColor: '#000'
+        },
+        '&:hover fieldset': {
+          borderWidth: '2px',
+          borderColor: '#000'
+        },
+        '&.Mui-focused fieldset': {
+          borderWidth: '2px',
+          borderColor: '#66ADFF'
+        }
+      },
+      '& .MuiFormHelperText-root': {
+        fontSize: '0.9rem',
+        marginTop: '8px'
+      }
+    }}>
+      {/* Network Warning */}
+      {isWrongNetwork && (
+        <Alert severity="warning" sx={{ padding: '16px', borderRadius: '12px', marginBottom: '24px' }}>
+          <Typography variant="body1" style={{ fontFamily: 'var(--font-doppio-one)', fontSize: '1rem', lineHeight: '1.6' }}>
+            <strong>Wrong Network!</strong><br/>
+            You're currently connected to the wrong network. TrustFlow requires Base Sepolia testnet.<br/>
+            <Button 
+              variant="outlined" 
+              size="small" 
+              onClick={() => switchChain({ chainId: baseSepolia.id })}
+              sx={{ 
+                marginTop: '8px',
+                fontFamily: 'var(--font-doppio-one)',
+                textTransform: 'none',
+                borderColor: '#ff9800',
+                color: '#ff9800',
+                '&:hover': {
+                  borderColor: '#f57c00',
+                  backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                }
+              }}
+            >
+              Switch to Base Sepolia
+            </Button>
+          </Typography>
+        </Alert>
+      )}
 
-        <Stepper activeStep={activeStep} className="mb-8">
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
+      {/* Simple form without stepper */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <Box>
+            <Typography variant="body1" sx={{ 
+              fontFamily: 'var(--font-doppio-one)', 
+              fontWeight: 700, 
+              fontSize: '1.1rem', 
+              marginBottom: '8px',
+              color: '#000'
+            }}>
+              Payer Address (Your Address)
+            </Typography>
+            <TextField
+              variant="outlined"
+              fullWidth
+              value={formData.payerAddress}
+              onChange={(e) => handleInputChange('payerAddress', e.target.value)}
+              placeholder="0x..."
+              error={!!errors.payerAddress}
+              helperText={errors.payerAddress || 'This is automatically filled with your connected wallet address'}
+              size="medium"
+            />
+          </Box>
 
-        <Box className="min-h-[400px]">
-          {renderStepContent(activeStep)}
-        </Box>
+          <Box>
+            <Typography variant="body1" sx={{ 
+              fontFamily: 'var(--font-doppio-one)', 
+              fontWeight: 700, 
+              fontSize: '1.1rem', 
+              marginBottom: '8px',
+              color: '#000'
+            }}>
+              Payee Address
+            </Typography>
+            <TextField
+              variant="outlined"
+              fullWidth
+              value={formData.payeeAddress}
+              onChange={(e) => handleInputChange('payeeAddress', e.target.value)}
+              placeholder="0x..."
+              error={!!errors.payeeAddress}
+              helperText={errors.payeeAddress || 'The address that will receive the funds when conditions are met'}
+              size="medium"
+            />
+          </Box>
 
-        <Box className="flex justify-between mt-6">
-          <Button
-            disabled={activeStep === 0}
-            onClick={handleBack}
-            variant="outlined"
-          >
-            Back
-          </Button>
-          
-          <Box className="flex gap-2">
-            {activeStep === steps.length - 1 ? (
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={isPending || isConfirming || isSuccess}
-              >
-                {isPending && <CircularProgress size={20} className="mr-2" />}
-                {isConfirming && <CircularProgress size={20} className="mr-2" />}
-                {isPending ? 'Creating...' : isConfirming ? 'Confirming...' : 'Create Agreement'}
-              </Button>
-            ) : (
-              <Button variant="contained" onClick={handleNext}>
-                Next
-              </Button>
-            )}
+          <Box>
+            <Typography variant="body1" sx={{ 
+              fontFamily: 'var(--font-doppio-one)', 
+              fontWeight: 700, 
+              fontSize: '1.1rem', 
+              marginBottom: '8px',
+              color: '#000'
+            }}>
+              Amount (ETH)
+            </Typography>
+            <TextField
+              variant="outlined"
+              fullWidth
+              type="number"
+              inputProps={{ step: '0.001', min: '0' }}
+              value={formData.amount}
+              onChange={(e) => handleInputChange('amount', e.target.value)}
+              placeholder="0.1"
+              error={!!errors.amount}
+              helperText={errors.amount || 'Amount to be held in escrow'}
+              size="medium"
+            />
           </Box>
         </Box>
-      </CardContent>
-    </Card>
+        
+        <Alert severity="info" sx={{ padding: '16px', borderRadius: '12px' }}>
+          <Typography variant="body1" style={{ fontFamily: 'var(--font-doppio-one)', fontSize: '1rem', lineHeight: '1.6' }}>
+            <strong>Fee Breakdown:</strong><br/>
+            • Escrow Amount: {formData.amount || '0'} ETH<br/>
+            • x402pay Creation Fee: {X402PAY_CREATION_FEE_ETH} ETH<br/>
+            • <strong>Total Required: {formData.amount ? (parseFloat(formData.amount) + X402PAY_CREATION_FEE_ETH).toFixed(4) : X402PAY_CREATION_FEE_ETH} ETH</strong>
+          </Typography>
+        </Alert>
+
+        <Box>
+          <Typography variant="body1" sx={{ 
+            fontFamily: 'var(--font-doppio-one)', 
+            fontWeight: 700, 
+            fontSize: '1.1rem', 
+            marginBottom: '8px',
+            color: '#000'
+          }}>
+            Agreement Description
+          </Typography>
+          <TextField
+            variant="outlined"
+            fullWidth
+            multiline
+            rows={4}
+            value={formData.description}
+            onChange={(e) => handleInputChange('description', e.target.value)}
+            placeholder="Describe the terms and conditions of this agreement..."
+            error={!!errors.description}
+            helperText={errors.description || 'A clear description of the agreement terms'}
+            size="medium"
+          />
+        </Box>
+
+        {/* Condition Type Selection */}
+        <Box>
+          <Typography variant="body1" sx={{ 
+            fontFamily: 'var(--font-doppio-one)', 
+            fontWeight: 700, 
+            fontSize: '1.1rem', 
+            marginBottom: '8px',
+            color: '#000'
+          }}>
+            Condition Type
+          </Typography>
+          <FormControl fullWidth error={!!errors.conditionType}>
+            <Select
+              value={formData.conditionType}
+              onChange={(e) => handleInputChange('conditionType', e.target.value as number)}
+              size="medium"
+              sx={{ 
+                '& .MuiSelect-select': { padding: '18px 14px', fontSize: '1rem' },
+                '& fieldset': {
+                  borderWidth: '2px',
+                  borderColor: '#000'
+                },
+                '&:hover fieldset': {
+                  borderWidth: '2px',
+                  borderColor: '#000'
+                },
+                '&.Mui-focused fieldset': {
+                  borderWidth: '2px',
+                  borderColor: '#66ADFF'
+                }
+              }}
+            >
+              <MenuItem value={0} sx={{ fontSize: '1rem', padding: '12px 16px' }}>Specific Date</MenuItem>
+              <MenuItem value={1} sx={{ fontSize: '1rem', padding: '12px 16px' }}>Task Completion</MenuItem>
+              <MenuItem value={2} sx={{ fontSize: '1rem', padding: '12px 16px' }}>GitHub PR Merged</MenuItem>
+              <MenuItem value={3} sx={{ fontSize: '1rem', padding: '12px 16px' }}>API Condition</MenuItem>
+              <MenuItem value={4} sx={{ fontSize: '1rem', padding: '12px 16px' }}>Custom Event</MenuItem>
+            </Select>
+            <FormHelperText sx={{ fontSize: '0.9rem', marginTop: '8px' }}>{errors.conditionType || 'Choose when funds should be released'}</FormHelperText>
+          </FormControl>
+        </Box>
+
+        {/* Condition Details */}
+        {renderConditionDetailsField()}
+
+        {/* Error Messages */}
+        {errors.submit && (
+          <Alert severity="error">{errors.submit}</Alert>
+        )}
+
+        {writeError && (
+          <Alert severity="error">
+            {parseBlockchainError(writeError).message}
+          </Alert>
+        )}
+
+        {receiptError && (
+          <Alert severity="error">
+            Transaction failed: {receiptError.message}
+          </Alert>
+        )}
+
+        {isSuccess && (
+          <Alert severity="success">
+            Agreement created successfully! Transaction hash: {hash}
+          </Alert>
+        )}
+
+                {/* Submit Button */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: '24px' }}>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={isPending || isConfirming || isSuccess}
+            size="large"
+            sx={{
+              backgroundColor: '#66ADFF',
+              color: 'white',
+              fontWeight: 600,
+              px: 8,
+              py: 3,
+              borderRadius: '16px',
+              textTransform: 'none',
+              fontSize: '1.1rem',
+              fontFamily: 'var(--font-doppio-one)',
+              minWidth: '200px',
+              minHeight: '56px',
+              border: '2px solid #000',
+              '&:hover': {
+                backgroundColor: '#5A9AE6',
+                border: '2px solid #000'
+              },
+              '&:disabled': {
+                backgroundColor: 'rgba(102, 173, 255, 0.5)',
+                border: '2px solid rgba(0, 0, 0, 0.3)'
+              }
+            }}
+          >
+            {isPending && <CircularProgress size={20} sx={{ marginRight: '8px' }} />}
+            {isConfirming && <CircularProgress size={20} sx={{ marginRight: '8px' }} />}
+            {isPending ? 'Creating...' : isConfirming ? 'Confirming...' : 'Create Agreement'}
+          </Button>
+        </Box>
+      </Box>
+    </Box>
   );
 } 

@@ -73,9 +73,9 @@ export default function ActiveAgreements() {
 
   if (firebaseLoading || isLoadingEscrows) {
     return (
-      <Card className="w-full max-w-4xl">
+      <Card className="shadow-lg">
         <CardContent>
-          <Typography variant="h6" className="font-bold mb-4">
+          <Typography variant="h5" className="font-bold mb-4">
             Active Agreements
           </Typography>
           <Box className="flex justify-center py-8">
@@ -88,9 +88,9 @@ export default function ActiveAgreements() {
 
   if (isError) {
     return (
-      <Card className="w-full max-w-4xl">
+      <Card className="shadow-lg">
         <CardContent>
-          <Typography variant="h6" className="font-bold mb-4">
+          <Typography variant="h5" className="font-bold mb-4">
             Active Agreements
           </Typography>
           <Alert severity="error">
@@ -102,9 +102,9 @@ export default function ActiveAgreements() {
   }
 
   return (
-    <Card className="w-full max-w-4xl">
+    <Card className="shadow-lg">
       <CardContent>
-        <Typography variant="h6" className="font-bold mb-4">
+        <Typography variant="h5" className="font-bold mb-4">
           Active Agreements
         </Typography>
 

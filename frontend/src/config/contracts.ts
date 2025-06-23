@@ -1,5 +1,5 @@
 // Contract configuration for Base Sepolia
-export const ESCROW_FACTORY_ADDRESS = "0x59bE47CeDe9Df251394A069A74F60E27902049f6";
+export const ESCROW_FACTORY_ADDRESS = "0x3F6D14f6F3637755FdbedA4866bA4d5b5948fc6d";
 
 export const ESCROW_FACTORY_ABI = [
   {

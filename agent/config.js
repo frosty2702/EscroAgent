@@ -10,7 +10,7 @@ const config = {
   
   // Contract Addresses
   contracts: {
-    escrowFactory: process.env.ESCROW_FACTORY_ADDRESS || '0x59bE47CeDe9Df251394A069A74F60E27902049f6',
+    escrowFactory: process.env.ESCROW_FACTORY_ADDRESS || '0x3F6D14f6F3637755FdbedA4866bA4d5b5948fc6d',
     x402payFeeAddress: process.env.X402PAY_FEE_ADDRESS || '0x4a72B8A18d64a67B0dCc77db012d0Bf7844C3d45',
     authorizedAgent: process.env.AUTHORIZED_AGENT_ADDRESS || '0xDcE892624C1f5e96C7F9b795350ED0F68f4f679a'
   },

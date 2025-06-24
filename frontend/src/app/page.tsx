@@ -67,8 +67,8 @@ export default function Home() {
         </Card>
       </div>
 
-      {/* Active Agreements section below - hidden for now to match mockup */}
-      <div className="w-full max-w-6xl mx-auto mt-8" style={{ display: 'none' }}>
+      {/* Active Agreements section below */}
+      <div className="w-full max-w-6xl mx-auto mt-8">
         <ActiveAgreements />
       </div>
     </div>

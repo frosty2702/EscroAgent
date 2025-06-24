@@ -1,32 +1,75 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Button, Typography, Box, Modal, Link } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Button, Typography, Box, Modal, Link, Alert } from '@mui/material';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { coinbaseWallet, metaMask } from 'wagmi/connectors';
+import { coinbaseWallet } from 'wagmi/connectors';
 
 export default function WalletConnection() {
   const { address, isConnected } = useAccount();
-  const { connect, isPending } = useConnect();
+  const { connect, isPending, error } = useConnect();
   const { disconnect } = useDisconnect();
   const [open, setOpen] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const handleOpen = () => {
     setOpen(true);
+    setConnectionError(null);
   };
 
   const handleClose = () => {
     setOpen(false);
+    setConnectionError(null);
+    setIsConnecting(false);
   };
 
-  const handleConnect = (walletType: 'coinbase' | 'metamask') => {
-    if (walletType === 'coinbase') {
-      connect({ connector: coinbaseWallet() });
-    } else {
-      connect({ connector: metaMask() });
-    }
-    handleClose();
+  const handleReset = () => {
+    setConnectionError(null);
+    setIsConnecting(false);
+    disconnect();
+    // Force a page refresh to clear any stuck states
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
+
+  const handleConnect = async () => {
+    try {
+      setConnectionError(null);
+      setIsConnecting(true);
+      
+      connect({ connector: coinbaseWallet() });
+      handleClose();
+    } catch (err) {
+      console.error('Connection error:', err);
+      setIsConnecting(false);
+      setConnectionError('Failed to connect wallet. Please try again.');
+    }
+  };
+
+  const handleDisconnect = () => {
+    disconnect();
+  };
+
+  // Clear error when connection succeeds
+  useEffect(() => {
+    if (isConnected) {
+      setConnectionError(null);
+      setIsConnecting(false);
+      setOpen(false);
+    }
+  }, [isConnected]);
+
+  // Handle wagmi connection errors
+  useEffect(() => {
+    if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any)?.message || 'Connection failed. Please try again.';
+      setConnectionError(errorMessage);
+      setIsConnecting(false);
+    }
+  }, [error]);
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -36,7 +79,7 @@ export default function WalletConnection() {
     return (
       <Button 
         variant="outlined" 
-        onClick={() => disconnect()}
+        onClick={handleDisconnect}
         size="medium"
         sx={{ 
           textTransform: 'none',
@@ -150,44 +193,36 @@ export default function WalletConnection() {
               color: '#000'
             }}
           >
-            Select any one wallet of your choice
+            Connect your Coinbase Wallet
           </Typography>
+
+          {/* Error Alert */}
+          {connectionError && (
+            <Alert 
+              severity="error" 
+              sx={{ mb: 3, fontFamily: 'var(--font-doppio-one)' }}
+              action={
+                <Button 
+                  color="inherit" 
+                  size="small" 
+                  onClick={handleReset}
+                  sx={{ fontFamily: 'var(--font-doppio-one)' }}
+                >
+                  Reset
+                </Button>
+              }
+            >
+              {connectionError}
+            </Alert>
+          )}
 
           {/* Wallet Options */}
           <Box sx={{ mb: 3 }}>
-            {/* MetaMask */}
-            <Button
-              onClick={() => handleConnect('metamask')}
-              fullWidth
-              sx={{
-                backgroundColor: '#EEEFE1',
-                color: '#000',
-                border: '3px solid #000',
-                borderRadius: '20px',
-                py: 2,
-                px: 3,
-                mb: 2,
-                textTransform: 'none',
-                fontSize: '18px',
-                fontWeight: 600,
-                fontFamily: 'var(--font-doppio-one)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                '&:hover': {
-                  backgroundColor: '#E0E1D3',
-                  border: '3px solid #000',
-                }
-              }}
-            >
-              <span>Metamask</span>
-              <span style={{ fontSize: '24px' }}>🦊</span>
-            </Button>
-
             {/* Coinbase Wallet */}
             <Button
-              onClick={() => handleConnect('coinbase')}
+              onClick={handleConnect}
               fullWidth
+              disabled={isPending || isConnecting}
               sx={{
                 backgroundColor: '#EEEFE1',
                 color: '#000',
@@ -205,10 +240,15 @@ export default function WalletConnection() {
                 '&:hover': {
                   backgroundColor: '#E0E1D3',
                   border: '3px solid #000',
+                },
+                '&:disabled': {
+                  backgroundColor: 'rgba(238, 239, 225, 0.5)',
+                  color: 'rgba(0, 0, 0, 0.5)',
+                  border: '3px solid rgba(0, 0, 0, 0.3)',
                 }
               }}
             >
-              <span>Coinbase Wallet</span>
+              <span>{(isPending || isConnecting) ? 'Connecting to Coinbase...' : 'Coinbase Wallet'}</span>
               <Box
                 sx={{
                   width: 24,
@@ -235,7 +275,7 @@ export default function WalletConnection() {
           {/* I Don't have a wallet link */}
           <Box sx={{ textAlign: 'center', mt: 3 }}>
             <Link
-              href="https://www.coinbase.com/en-in/learn/crypto-basics/what-is-a-crypto-wallet"
+              href="https://www.coinbase.com/wallet"
               target="_blank"
               rel="noopener noreferrer"
               sx={{
@@ -250,7 +290,7 @@ export default function WalletConnection() {
                 }
               }}
             >
-              I Don't have a wallet
+              I don&apos;t have a Coinbase Wallet
             </Link>
           </Box>
         </Box>

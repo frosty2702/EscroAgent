@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -81,6 +81,16 @@ export default function CreateAgreementForm() {
     hash,
   });
 
+  // Memoize expensive calculations
+  const totalRequired = useMemo(() => {
+    const amount = parseFloat(formData.amount) || 0;
+    return amount + X402PAY_CREATION_FEE_ETH;
+  }, [formData.amount]);
+
+  const isWrongNetwork = useMemo(() => {
+    return chainId !== baseSepolia.id;
+  }, [chainId]);
+
   // Update payer address when wallet connects
   useEffect(() => {
     if (address && isConnected) {
@@ -102,14 +112,16 @@ export default function CreateAgreementForm() {
     }
   }, [isSuccess, hash, firestoreDocId, updateAgreement]);
 
-  const handleInputChange = (field: keyof FormData, value: string | number | Date | null) => {
+  // Debounced input change handler to reduce re-renders
+  const handleInputChange = useCallback((field: keyof FormData, value: string | number | Date | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
-  };
+  }, [errors]);
 
-  const validateCurrentStep = (): boolean => {
+  // Memoized validation function
+  const validateCurrentStep = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
 
     // Validate basic required fields
@@ -168,19 +180,19 @@ export default function CreateAgreementForm() {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (validateCurrentStep()) {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
-  };
+  }, [validateCurrentStep]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+  }, []);
 
-  const generateConditionHash = (): `0x${string}` => {
+  const generateConditionHash = useCallback((): `0x${string}` => {
     let conditionData = '';
     
     switch (formData.conditionType) {
@@ -202,9 +214,9 @@ export default function CreateAgreementForm() {
     }
 
     return keccak256(toBytes(conditionData));
-  };
+  }, [formData.conditionType, formData.settlementDate, formData.taskName, formData.githubPrUrl, formData.apiEndpoint, formData.expectedValue, formData.customEventName]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!validateCurrentStep() || !isConnected) return;
 
     // Check if we're on the correct network (Base Sepolia)
@@ -307,9 +319,10 @@ export default function CreateAgreementForm() {
       
       setErrors({ submit: errorMessage });
     }
-  };
+  }, [validateCurrentStep, isConnected, chainId, switchChain, formData, createAgreement, generateConditionHash, writeContract]);
 
-  const renderConditionDetailsField = () => {
+  // Memoized condition details field to prevent unnecessary re-renders
+  const renderConditionDetailsField = useMemo(() => {
     switch (formData.conditionType) {
       case 0: // Specific Date
         return (
@@ -395,7 +408,7 @@ export default function CreateAgreementForm() {
       default:
         return null;
     }
-  };
+  }, [formData.conditionType, formData.settlementDate, formData.taskName, formData.githubPrUrl, formData.apiEndpoint, formData.expectedValue, formData.customEventName, errors.conditionDetails, handleInputChange]);
 
   if (!isConnected) {
     return (
@@ -406,9 +419,6 @@ export default function CreateAgreementForm() {
       </Box>
     );
   }
-
-  // Check if user is on the wrong network
-  const isWrongNetwork = chainId !== baseSepolia.id;
 
   return (
     <Box className="max-w-4xl mx-auto" sx={{ 
@@ -543,7 +553,7 @@ export default function CreateAgreementForm() {
             <strong>Fee Breakdown:</strong><br/>
             • Escrow Amount: {formData.amount || '0'} ETH<br/>
             • x402pay Creation Fee: {X402PAY_CREATION_FEE_ETH} ETH<br/>
-            • <strong>Total Required: {formData.amount ? (parseFloat(formData.amount) + X402PAY_CREATION_FEE_ETH).toFixed(4) : X402PAY_CREATION_FEE_ETH} ETH</strong>
+            • <strong>Total Required: {totalRequired.toFixed(4)} ETH</strong>
           </Typography>
         </Alert>
 
@@ -614,7 +624,7 @@ export default function CreateAgreementForm() {
         </Box>
 
         {/* Condition Details */}
-        {renderConditionDetailsField()}
+        {renderConditionDetailsField}
 
         {/* Error Messages */}
         {errors.submit && (
@@ -639,7 +649,7 @@ export default function CreateAgreementForm() {
           </Alert>
         )}
 
-                {/* Submit Button */}
+        {/* Submit Button */}
         <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: '24px' }}>
           <Button
             variant="contained"

@@ -44,11 +44,11 @@ export default function ActiveAgreements() {
   });
 
   // Get total agreement count
-  const { data: agreementCount } = useReadContract({
-    address: ESCROW_FACTORY_ADDRESS,
-    abi: ESCROW_FACTORY_ABI,
-    functionName: 'getAgreementCount',
-  });
+  // const { data: agreementCount } = useReadContract({
+  //   address: ESCROW_FACTORY_ADDRESS,
+  //   abi: ESCROW_FACTORY_ABI,
+  //   functionName: 'getAgreementCount',
+  // });
 
   // Get total volume
   const { data: totalVolume } = useReadContract({
@@ -61,12 +61,12 @@ export default function ActiveAgreements() {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: unknown) => {
     if (!timestamp) return 'N/A';
-    if (timestamp.toDate) {
-      return timestamp.toDate().toLocaleDateString();
+    if (typeof timestamp === 'object' && timestamp !== null && 'toDate' in timestamp) {
+      return (timestamp as { toDate: () => Date }).toDate().toLocaleDateString();
     }
-    return new Date(timestamp).toLocaleDateString();
+    return new Date(timestamp as string | number | Date).toLocaleDateString();
   };
 
   const userAgreements = address ? getUserAgreements(address) : [];
@@ -167,7 +167,7 @@ export default function ActiveAgreements() {
             
             {userAgreements.length === 0 ? (
               <Alert severity="info" style={{ borderRadius: '12px', fontFamily: 'var(--font-doppio-one)' }}>
-                You don't have any agreements yet. Create your first agreement to get started!
+                You don&apos;t have any agreements yet. Create your first agreement to get started!
               </Alert>
             ) : (
               <Box className="space-y-4">

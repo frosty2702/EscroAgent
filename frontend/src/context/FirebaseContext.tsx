@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { collection, addDoc, updateDoc, doc, query, where, onSnapshot, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, query, onSnapshot, orderBy, Timestamp } from 'firebase/firestore';
 import { auth, db, signInAnonymously } from '../lib/firebase';
 
 // Types for our agreement data

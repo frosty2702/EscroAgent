@@ -11,7 +11,7 @@ export interface ErrorInfo {
 /**
  * Parses blockchain/wallet errors into user-friendly messages
  */
-export const parseBlockchainError = (error: any): ErrorInfo => {
+export const parseBlockchainError = (error: any): ErrorInfo => { // eslint-disable-line @typescript-eslint/no-explicit-any
   console.error('Blockchain error:', error);
 
   // User rejected transaction
@@ -129,7 +129,7 @@ export const parseValidationError = (error: string): ErrorInfo => {
 /**
  * Parses API/network errors
  */
-export const parseNetworkError = (error: any): ErrorInfo => {
+export const parseNetworkError = (error: any): ErrorInfo => { // eslint-disable-line @typescript-eslint/no-explicit-any
   if (error.code === 'NETWORK_ERROR' || !navigator.onLine) {
     return {
       title: 'Network Error',
@@ -172,7 +172,7 @@ export const parseNetworkError = (error: any): ErrorInfo => {
 /**
  * Creates a standardized error object for logging
  */
-export const createErrorLog = (error: any, context: string): object => {
+export const createErrorLog = (error: any, context: string): object => { // eslint-disable-line @typescript-eslint/no-explicit-any
   return {
     timestamp: new Date().toISOString(),
     context,
@@ -192,7 +192,7 @@ export const createErrorLog = (error: any, context: string): object => {
  */
 export const safeAsync = async <T>(
   fn: () => Promise<T>,
-  errorHandler?: (error: any) => void
+  errorHandler?: (error: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
 ): Promise<T | null> => {
   try {
     return await fn();
@@ -213,7 +213,7 @@ export const retryOperation = async <T>(
   maxRetries: number = 3,
   delayMs: number = 1000
 ): Promise<T> => {
-  let lastError: any;
+  let lastError: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -237,7 +237,7 @@ export const retryOperation = async <T>(
 /**
  * Checks if an error is retryable
  */
-export const isRetryableError = (error: any): boolean => {
+export const isRetryableError = (error: any): boolean => { // eslint-disable-line @typescript-eslint/no-explicit-any
   const retryableCodes = [
     -32603, // Internal error
     429,    // Rate limit

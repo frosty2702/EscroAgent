@@ -6,7 +6,7 @@ import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { coinbaseWallet } from 'wagmi/connectors';
 
 export default function WalletConnection() {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const { connect, isPending, error } = useConnect();
   const { disconnect } = useDisconnect();
   const [open, setOpen] = useState(false);
@@ -39,12 +39,39 @@ export default function WalletConnection() {
       setConnectionError(null);
       setIsConnecting(true);
       
-      connect({ connector: coinbaseWallet() });
-      handleClose();
+      console.log('Attempting to connect with Coinbase Wallet...');
+      
+      // Create connector with specific configuration
+      const connector = coinbaseWallet({
+        appName: 'TrustFlow',
+        appLogoUrl: undefined,
+        preference: 'smartWalletOnly',
+      });
+      
+      await connect({ connector });
+      console.log('Connection successful!');
+      
     } catch (err) {
       console.error('Connection error:', err);
       setIsConnecting(false);
-      setConnectionError('Failed to connect wallet. Please try again.');
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to connect wallet. ';
+      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const error = err as any;
+      
+      if (error?.message?.includes('User rejected')) {
+        errorMessage += 'You cancelled the connection request.';
+      } else if (error?.message?.includes('No wallet')) {
+        errorMessage += 'Coinbase Wallet not found. Please install the Coinbase Wallet extension.';
+      } else if (error?.message?.includes('Already processing')) {
+        errorMessage += 'Connection already in progress. Please check your wallet.';
+      } else {
+        errorMessage += 'Please make sure Coinbase Wallet is installed and try again.';
+      }
+      
+      setConnectionError(errorMessage);
     }
   };
 
@@ -55,6 +82,7 @@ export default function WalletConnection() {
   // Clear error when connection succeeds
   useEffect(() => {
     if (isConnected) {
+      console.log('Wallet connected successfully!');
       setConnectionError(null);
       setIsConnecting(false);
       setOpen(false);
@@ -70,10 +98,6 @@ export default function WalletConnection() {
       setIsConnecting(false);
     }
   }, [error]);
-
-  const formatAddress = (addr: string) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-  };
 
   if (isConnected) {
     return (
@@ -196,6 +220,16 @@ export default function WalletConnection() {
             Connect your Coinbase Wallet
           </Typography>
 
+          {/* Installation Info */}
+          <Alert severity="info" sx={{ mb: 3, fontFamily: 'var(--font-doppio-one)' }}>
+            <Typography variant="body2" sx={{ fontFamily: 'var(--font-doppio-one)' }}>
+              <strong>Need Coinbase Wallet?</strong><br/>
+              1. Install the Coinbase Wallet browser extension<br/>
+              2. Create or import your wallet<br/>
+              3. Make sure you&apos;re on Base Sepolia network
+            </Typography>
+          </Alert>
+
           {/* Error Alert */}
           {connectionError && (
             <Alert 
@@ -272,10 +306,10 @@ export default function WalletConnection() {
             </Button>
           </Box>
 
-          {/* I Don't have a wallet link */}
+          {/* Download Coinbase Wallet link */}
           <Box sx={{ textAlign: 'center', mt: 3 }}>
             <Link
-              href="https://www.coinbase.com/wallet"
+              href="https://chrome.google.com/webstore/detail/coinbase-wallet-extension/hnfanknocfeofbddgcijnmhnfnkdnaad"
               target="_blank"
               rel="noopener noreferrer"
               sx={{
@@ -290,7 +324,7 @@ export default function WalletConnection() {
                 }
               }}
             >
-              I don&apos;t have a Coinbase Wallet
+              Download Coinbase Wallet Extension
             </Link>
           </Box>
         </Box>

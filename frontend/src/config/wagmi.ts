@@ -7,10 +7,11 @@ export const config = createConfig({
   connectors: [
     coinbaseWallet({
       appName: 'TrustFlow',
-      appLogoUrl: 'https://trustflow.app/logo.png',
+      appLogoUrl: undefined, // Remove the logo URL as it might cause issues
+      preference: 'smartWalletOnly', // Focus on Coinbase Smart Wallet
     }),
   ],
   transports: {
-    [baseSepolia.id]: http(),
+    [baseSepolia.id]: http('https://sepolia.base.org'), // Use explicit RPC URL
   },
 }); 

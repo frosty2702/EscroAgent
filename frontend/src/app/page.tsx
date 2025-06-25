@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Typography, Box, Card, CardContent } from '@mui/material';
+import { Typography, Card, CardContent } from '@mui/material';
 import { useAccount } from 'wagmi';
 import WalletConnection from '../components/WalletConnection';
 import CreateAgreementForm from '../components/CreateAgreementForm';

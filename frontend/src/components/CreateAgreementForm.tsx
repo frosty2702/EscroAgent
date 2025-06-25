@@ -2,22 +2,15 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Card,
-  CardContent,
   TextField,
   Button,
   Typography,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   Alert,
   CircularProgress,
   Box,
-  Stepper,
-  Step,
-  StepLabel,
-  Divider,
   FormHelperText
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -49,15 +42,15 @@ interface FormData {
   customEventName?: string;
 }
 
-const CONDITION_TYPES = [
-  { value: 0, label: 'Specific Date', description: 'Release funds on a specific date' },
-  { value: 1, label: 'Task Completion', description: 'Release when task is marked complete (simulated)' },
-  { value: 2, label: 'GitHub PR Merged', description: 'Release when GitHub PR is merged (simulated)' },
-  { value: 3, label: 'API Condition', description: 'Release when API returns expected value (simulated)' },
-  { value: 4, label: 'Custom Event', description: 'Release when custom event is triggered (simulated)' }
-];
+// const CONDITION_TYPES = [
+//   { value: 0, label: 'Specific Date', description: 'Release funds on a specific date' },
+//   { value: 1, label: 'Task Completion', description: 'Release when task is marked complete (simulated)' },
+//   { value: 2, label: 'GitHub PR Merged', description: 'Release when GitHub PR is merged (simulated)' },
+//   { value: 3, label: 'API Condition', description: 'Release when API returns expected value (simulated)' },
+//   { value: 4, label: 'Custom Event', description: 'Release when custom event is triggered (simulated)' }
+// ];
 
-const steps = ['Agreement Details', 'Condition Setup', 'Review & Submit'];
+// const steps = ['Agreement Details', 'Condition Setup', 'Review & Submit'];
 
 export default function CreateAgreementForm() {
   const { address, isConnected } = useAccount();
@@ -65,7 +58,7 @@ export default function CreateAgreementForm() {
   const { switchChain } = useSwitchChain();
   const { createAgreement, updateAgreement } = useFirebase();
   
-  const [activeStep, setActiveStep] = useState(0);
+  // const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
     payerAddress: '',
     payeeAddress: '',
@@ -182,15 +175,15 @@ export default function CreateAgreementForm() {
     return Object.keys(newErrors).length === 0;
   }, [formData]);
 
-  const handleNext = useCallback(() => {
-    if (validateCurrentStep()) {
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    }
-  }, [validateCurrentStep]);
+  // const handleNext = useCallback(() => {
+  //   if (validateCurrentStep()) {
+  //     setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  //   }
+  // }, [validateCurrentStep]);
 
-  const handleBack = useCallback(() => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  }, []);
+  // const handleBack = useCallback(() => {
+  //   setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  // }, []);
 
   const generateConditionHash = useCallback((): `0x${string}` => {
     let conditionData = '';
@@ -235,7 +228,7 @@ export default function CreateAgreementForm() {
       console.log('Form data:', formData);
       
       // First, save to Firestore
-      const agreementData: any = {
+      const agreementData: Omit<AgreementData, 'id' | 'createdAt' | 'status'> = {
         payerAddress: formData.payerAddress,
         payeeAddress: formData.payeeAddress,
         amount: parseFloat(formData.amount),
@@ -297,7 +290,7 @@ export default function CreateAgreementForm() {
         value: totalValueWei,
       });
 
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       console.error('Error creating agreement:', error);
       
       // Provide more specific error messages
@@ -349,7 +342,7 @@ export default function CreateAgreementForm() {
             fullWidth
             value={formData.taskName || ''}
             onChange={(e) => handleInputChange('taskName', e.target.value)}
-            placeholder="e.g., 'Website Redesign Phase 1'"
+            placeholder="e.g., &apos;Website Redesign Phase 1&apos;"
             error={!!errors.conditionDetails}
             helperText={errors.conditionDetails || 'Task that needs to be completed for fund release'}
           />
@@ -453,7 +446,7 @@ export default function CreateAgreementForm() {
         <Alert severity="warning" sx={{ padding: '16px', borderRadius: '12px', marginBottom: '24px' }}>
           <Typography variant="body1" style={{ fontFamily: 'var(--font-doppio-one)', fontSize: '1rem', lineHeight: '1.6' }}>
             <strong>Wrong Network!</strong><br/>
-            You're currently connected to the wrong network. TrustFlow requires Base Sepolia testnet.<br/>
+            You&apos;re currently connected to the wrong network. TrustFlow requires Base Sepolia testnet.<br/>
             <Button 
               variant="outlined" 
               size="small" 

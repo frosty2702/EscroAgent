@@ -12,13 +12,26 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase only if it hasn't been initialized
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Check if Firebase config is available
+const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.projectId;
+
+// Initialize Firebase only if it hasn't been initialized and config is available
+let app: any = null;
+let auth: any = null;
+let db: any = null;
+
+if (isFirebaseConfigured) {
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  auth = getAuth(app);
+  db = getFirestore(app);
+}
 
 // Authentication functions
 export const signInWithToken = async (token: string) => {
+  if (!isFirebaseConfigured || !auth) {
+    console.warn('Firebase not configured, skipping authentication');
+    return;
+  }
   try {
     await signInWithCustomToken(auth, token);
   } catch (error) {
@@ -30,6 +43,10 @@ export const signInWithToken = async (token: string) => {
 
 // Sign in anonymously (for demo purposes)
 export const signInAnonymously = async () => {
+  if (!isFirebaseConfigured || !auth) {
+    console.warn('Firebase not configured, skipping authentication');
+    return;
+  }
   try {
     await firebaseSignInAnonymously(auth);
   } catch (error) {

@@ -29,6 +29,7 @@ contract Escrow is ReentrancyGuard, Ownable {
     address public authorizedAgent;
     address public immutable x402payFeeAddress;
     uint256 public immutable x402payFeeAmount;
+    address public immutable factory;
 
     // Events
     event AgreementSettled(address indexed payer, address indexed payee, uint256 amount, uint256 timestamp);
@@ -102,6 +103,7 @@ contract Escrow is ReentrancyGuard, Ownable {
         authorizedAgent = _authorizedAgent;
         x402payFeeAddress = _x402payFeeAddress;
         x402payFeeAmount = _x402payFeeAmount;
+        factory = msg.sender; // Store factory address
     }
 
     /**
@@ -143,7 +145,11 @@ contract Escrow is ReentrancyGuard, Ownable {
      * @dev Receive function to accept ETH
      */
     receive() external payable {
-        require(msg.sender == agreement.payer, "Only payer can send funds");
+        // Allow factory to send initial funds or payer to send additional funds
+        require(
+            msg.sender == agreement.payer || msg.sender == factory, 
+            "Only payer or factory can send funds"
+        );
         require(msg.value == agreement.amount, "Incorrect amount sent");
         
         Status oldStatus = agreement.status;

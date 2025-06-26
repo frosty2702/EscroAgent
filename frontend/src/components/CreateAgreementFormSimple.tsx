@@ -23,7 +23,7 @@ import { parseEther, keccak256, toBytes } from 'viem';
 import { ESCROW_FACTORY_ADDRESS, ESCROW_FACTORY_ABI } from '../config/contracts';
 
 // x402pay Creation Fee Configuration
-const X402PAY_CREATION_FEE_ETH = 0.0005;
+const X402PAY_CREATION_FEE_ETH = 0.0005; // Match deployed contract fee
 
 interface FormData {
   payerAddress: string;

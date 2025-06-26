@@ -58,3 +58,309 @@
 2025-06-18 21:09:15 [INFO]: Blockchain service cleanup completed {
   "service": "trustflow-agent"
 }
+2025-06-25 21:40:49 [INFO]: Blockchain service initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "factoryAddress": "0xe5AA99067EECAA08b4B7A6B6DF3B4DfC95819234",
+  "network": "Base Sepolia"
+}
+2025-06-25 21:40:50 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 21:40:50 [INFO]: Blockchain service cleanup completed {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:11 [INFO]: ============================================================ {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:11 [INFO]: 🤖 TrustFlow Autonomous Agent Starting... {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:11 [INFO]: ============================================================ {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:11 [INFO]: Agent Configuration: {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "factoryAddress": "0xe5AA99067EECAA08b4B7A6B6DF3B4DfC95819234",
+  "network": "Base Sepolia",
+  "monitoringInterval": "30s"
+}
+2025-06-25 22:56:11 [INFO]: [STARTUP] Initializing TrustFlow Agent Service {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:11 [INFO]: Blockchain service initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "factoryAddress": "0xe5AA99067EECAA08b4B7A6B6DF3B4DfC95819234",
+  "network": "Base Sepolia"
+}
+2025-06-25 22:56:11 [INFO]: Event listeners setup successfully {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:12 [INFO]: [STARTUP] Agent initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "balance": "0.00748956191434308 ETH",
+  "factoryContract": "0xe5AA99067EECAA08b4B7A6B6DF3B4DfC95819234"
+}
+2025-06-25 22:56:12 [INFO]: [STARTUP] Starting agreement monitoring {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:12 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:13 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:13 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:13 [INFO]: [STARTUP] Agreement monitoring started successfully {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:13 [INFO]: ============================================================ {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:13 [INFO]: ✅ TrustFlow Agent is now running! {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:13 [INFO]: ============================================================ {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:30 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:56:30 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:57:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:57:00 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:57:00 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:57:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:57:30 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:57:30 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:58:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:58:01 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:58:01 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:58:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:58:31 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:58:31 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:59:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:59:01 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:59:01 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:59:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:59:31 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 22:59:31 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:00:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:00:01 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:00:01 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:00:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:00:31 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:00:31 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:01:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:01:01 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:01:01 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:01:14 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:01:14 [INFO]: Agent Status Check {
+  "service": "trustflow-agent",
+  "isRunning": true,
+  "balance": "0.00748956191434308 ETH",
+  "totalEscrows": 0,
+  "uptime": "303.13503s"
+}
+2025-06-25 23:01:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:01:31 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:01:31 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:02:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:02:01 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:02:01 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:02:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:02:30 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:02:30 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:03:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:03:00 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:03:00 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:03:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:03:30 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:03:30 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:04:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:04:00 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:04:00 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:04:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:04:30 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:04:30 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:05:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:05:00 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:05:00 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:05:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:05:30 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:05:30 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:06:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:06:00 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:06:00 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:06:15 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:06:15 [INFO]: Agent Status Check {
+  "service": "trustflow-agent",
+  "isRunning": true,
+  "balance": "0.00748956191434308 ETH",
+  "totalEscrows": 0,
+  "uptime": "603.374487334s"
+}
+2025-06-25 23:06:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:06:30 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:06:30 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:07:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:07:00 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:07:00 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:07:30 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:07:30 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:07:30 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:08:00 [INFO]: [MONITORING] Starting monitoring cycle {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:08:01 [INFO]: Found 0 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-25 23:08:01 [INFO]: [MONITORING] No escrow contracts found {
+  "service": "trustflow-agent"
+}

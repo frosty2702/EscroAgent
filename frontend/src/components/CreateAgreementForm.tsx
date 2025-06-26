@@ -26,7 +26,7 @@ import { useFirebase, AgreementData } from '../context/FirebaseContext';
 import { parseBlockchainError } from '../utils/errorHandling';
 
 // x402pay Creation Fee Configuration
-const X402PAY_CREATION_FEE_ETH = 0.0005;
+const X402PAY_CREATION_FEE_ETH = 0.0005; // Match deployed contract fee
 
 interface FormData {
   payerAddress: string;

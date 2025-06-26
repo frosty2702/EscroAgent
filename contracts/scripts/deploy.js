@@ -11,8 +11,8 @@ async function main() {
     throw new Error("Missing required environment variables: X402PAY_FEE_ADDRESS or AUTHORIZED_AGENT_ADDRESS");
   }
 
-  // Set fee amounts
-  const x402payFeeAmount = ethers.parseEther("0.001"); // Settlement fee
+  // Set fee amounts - REDUCED settlement fee for testing
+  const x402payFeeAmount = ethers.parseEther("0.0001"); // Reduced settlement fee for testing
   
   // Get creation fee from environment variable or use default
   const creationFeeEth = process.env.X402PAY_CREATION_FEE_ETH || "0.0005";

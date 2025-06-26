@@ -40,7 +40,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${tiltWarp.variable} ${doppioOne.variable} antialiased`}
       >
         <Providers>
-          {children}
+        {children}
         </Providers>
       </body>
     </html>

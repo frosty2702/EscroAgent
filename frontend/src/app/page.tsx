@@ -10,6 +10,14 @@ import ActiveAgreements from '../components/ActiveAgreements';
 export default function Home() {
   const { address, isConnected } = useAccount();
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('Wallet connection status:', { isConnected, address });
+    if (address) {
+      console.log('Connected wallet address:', address);
+    }
+  }, [isConnected, address]);
+
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };

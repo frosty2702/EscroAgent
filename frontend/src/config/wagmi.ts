@@ -8,7 +8,7 @@ export const config = createConfig({
     coinbaseWallet({
       appName: 'TrustFlow',
       appLogoUrl: undefined, // Remove the logo URL as it might cause issues
-      preference: 'smartWalletOnly', // Focus on Coinbase Smart Wallet
+      preference: 'all', // Allow both extension and Smart Wallet
     }),
   ],
   transports: {

@@ -1,18 +1,18 @@
 require('dotenv').config();
 
 const config = {
-  // Agent Configuration
-  agentPrivateKey: process.env.AGENT_PRIVATE_KEY || '977b96a03a20b5349efbe1966dea73c44f169baf41e9c1c624a0a85c92e19b6f',
+  // Agent Configuration - Using your Smart Wallet address for monitoring
+  agentPrivateKey: process.env.AGENT_PRIVATE_KEY || '1ba4f06131a9fafe420eb48252589de2382128222056c4ec14d46d6013867750',
   baseSepolia: {
     rpcUrl: process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org',
     chainId: 84532
   },
   
-  // Contract Addresses
+  // Contract Addresses - Updated to use your wallets
   contracts: {
-    escrowFactory: process.env.ESCROW_FACTORY_ADDRESS || '0x3F6D14f6F3637755FdbedA4866bA4d5b5948fc6d',
-    x402payFeeAddress: process.env.X402PAY_FEE_ADDRESS || '0x4a72B8A18d64a67B0dCc77db012d0Bf7844C3d45',
-    authorizedAgent: process.env.AUTHORIZED_AGENT_ADDRESS || '0xDcE892624C1f5e96C7F9b795350ED0F68f4f679a'
+    escrowFactory: process.env.ESCROW_FACTORY_ADDRESS || '0x77925a92943432B596233759DAEC424b3BAf22c1', // Your new factory contract
+    x402payFeeAddress: process.env.X402PAY_FEE_ADDRESS || '0xfB470D35B311C15CFdc3142318eEaB2016c90914', // Your fee collector wallet
+    authorizedAgent: process.env.AUTHORIZED_AGENT_ADDRESS || '0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B' // Your agent wallet
   },
   
   // Monitoring Settings

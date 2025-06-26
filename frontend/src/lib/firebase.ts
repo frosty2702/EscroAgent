@@ -18,8 +18,11 @@ const isFirebaseConfigured = process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
                             process.env.NEXT_PUBLIC_FIREBASE_API_KEY !== 'demo-key';
 
 // Initialize Firebase only if it hasn't been initialized and config is available
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let app: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let auth: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let db: any = null;
 
 // Only initialize Firebase on the client side and when properly configured

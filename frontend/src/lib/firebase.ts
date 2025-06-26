@@ -1,6 +1,6 @@
-import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, signInWithCustomToken, signInAnonymously as firebaseSignInAnonymously } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { getAuth, signInWithCustomToken, signInAnonymously as firebaseSignInAnonymously, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 
 // Firebase configuration - these should be set in your environment
 const firebaseConfig = {
@@ -18,12 +18,9 @@ const isFirebaseConfigured = process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
                             process.env.NEXT_PUBLIC_FIREBASE_API_KEY !== 'demo-key';
 
 // Initialize Firebase only if it hasn't been initialized and config is available
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let app: any = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let auth: any = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let db: any = null;
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let db: Firestore | null = null;
 
 // Only initialize Firebase on the client side and when properly configured
 if (typeof window !== 'undefined' && isFirebaseConfigured) {

@@ -73,6 +73,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
 
   // Initialize authentication
   useEffect(() => {
+    if (!auth) {
+      // Firebase not configured, skip authentication
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         // Sign in anonymously for demo purposes
@@ -92,7 +98,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
 
   // Set up real-time listener for agreements
   useEffect(() => {
-    if (!user) return;
+    if (!user || !db) return;
 
     const agreementsRef = collection(db, 'agreements');
     const q = query(
@@ -118,6 +124,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
 
   // Create a new agreement in Firestore
   const createAgreement = async (agreementData: Omit<AgreementData, 'id' | 'createdAt' | 'status'>): Promise<string> => {
+    if (!db) {
+      console.warn('Firebase not configured, creating mock agreement ID');
+      return 'mock-agreement-' + Date.now();
+    }
+    
     try {
       const docRef = await addDoc(collection(db, 'agreements'), {
         ...agreementData,
@@ -134,6 +145,11 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
 
   // Update an existing agreement
   const updateAgreement = async (agreementId: string, updates: Partial<AgreementData>): Promise<void> => {
+    if (!db) {
+      console.warn('Firebase not configured, skipping agreement update');
+      return;
+    }
+    
     try {
       const agreementRef = doc(db, 'agreements', agreementId);
       await updateDoc(agreementRef, {

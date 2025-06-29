@@ -364,3 +364,125 @@
 2025-06-25 23:08:01 [INFO]: [MONITORING] No escrow contracts found {
   "service": "trustflow-agent"
 }
+2025-06-27 00:58:49 [INFO]: Blockchain service initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "factoryAddress": "0x77925a92943432B596233759DAEC424b3BAf22c1",
+  "network": "Base Sepolia"
+}
+2025-06-27 00:58:50 [INFO]: Found 2 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-27 00:58:52 [INFO]: Blockchain service cleanup completed {
+  "service": "trustflow-agent"
+}
+2025-06-27 00:59:12 [INFO]: [STARTUP] Initializing TrustFlow Agent Service {
+  "service": "trustflow-agent"
+}
+2025-06-27 00:59:12 [INFO]: Blockchain service initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "factoryAddress": "0x77925a92943432B596233759DAEC424b3BAf22c1",
+  "network": "Base Sepolia"
+}
+2025-06-27 00:59:12 [INFO]: Event listeners setup successfully {
+  "service": "trustflow-agent"
+}
+2025-06-27 00:59:13 [INFO]: [STARTUP] Agent initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "balance": "0.00748125888985976 ETH",
+  "factoryContract": "0x77925a92943432B596233759DAEC424b3BAf22c1"
+}
+2025-06-27 00:59:13 [INFO]: Blockchain service initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "factoryAddress": "0x77925a92943432B596233759DAEC424b3BAf22c1",
+  "network": "Base Sepolia"
+}
+2025-06-27 00:59:13 [INFO]: Found 2 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-27 00:59:14 [INFO]: [CONDITION] Condition manually triggered {
+  "service": "trustflow-agent",
+  "escrowAddress": "0xbf44C98c7270d087D729B3504a24c01a4C460F1e",
+  "conditionType": 0
+}
+2025-06-27 00:59:18 [INFO]: [CONDITION] Condition manually triggered {
+  "service": "trustflow-agent",
+  "escrowAddress": "0xB0A39E953d8620F16a1D080B570a5e6891258466",
+  "conditionType": 0
+}
+2025-06-27 00:59:20 [INFO]: [STARTUP] Stopping agent service {
+  "service": "trustflow-agent"
+}
+2025-06-27 00:59:20 [INFO]: Blockchain service cleanup completed {
+  "service": "trustflow-agent"
+}
+2025-06-27 00:59:20 [INFO]: [STARTUP] Agent service stopped {
+  "service": "trustflow-agent"
+}
+2025-06-27 00:59:20 [INFO]: Blockchain service cleanup completed {
+  "service": "trustflow-agent"
+}
+2025-06-27 01:17:48 [INFO]: Blockchain service initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "factoryAddress": "0x77925a92943432B596233759DAEC424b3BAf22c1",
+  "network": "Base Sepolia"
+}
+2025-06-27 01:17:48 [INFO]: Found 2 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-27 01:17:53 [INFO]: Blockchain service cleanup completed {
+  "service": "trustflow-agent"
+}
+2025-06-27 01:18:01 [INFO]: [STARTUP] Initializing TrustFlow Agent Service {
+  "service": "trustflow-agent"
+}
+2025-06-27 01:18:01 [INFO]: Blockchain service initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "factoryAddress": "0x77925a92943432B596233759DAEC424b3BAf22c1",
+  "network": "Base Sepolia"
+}
+2025-06-27 01:18:01 [INFO]: Event listeners setup successfully {
+  "service": "trustflow-agent"
+}
+2025-06-27 01:18:01 [INFO]: [STARTUP] Agent initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "balance": "0.00748125888985976 ETH",
+  "factoryContract": "0x77925a92943432B596233759DAEC424b3BAf22c1"
+}
+2025-06-27 01:18:01 [INFO]: Blockchain service initialized successfully {
+  "service": "trustflow-agent",
+  "agentAddress": "0xff85A11F295122296B4DcB4D3E8F5da6b8c40d1B",
+  "factoryAddress": "0x77925a92943432B596233759DAEC424b3BAf22c1",
+  "network": "Base Sepolia"
+}
+2025-06-27 01:18:01 [INFO]: Found 2 deployed escrow contracts {
+  "service": "trustflow-agent"
+}
+2025-06-27 01:18:02 [INFO]: [CONDITION] Condition manually triggered {
+  "service": "trustflow-agent",
+  "escrowAddress": "0xbf44C98c7270d087D729B3504a24c01a4C460F1e",
+  "conditionType": 0
+}
+2025-06-27 01:18:05 [INFO]: [CONDITION] Condition manually triggered {
+  "service": "trustflow-agent",
+  "escrowAddress": "0xB0A39E953d8620F16a1D080B570a5e6891258466",
+  "conditionType": 0
+}
+2025-06-27 01:18:07 [INFO]: [STARTUP] Stopping agent service {
+  "service": "trustflow-agent"
+}
+2025-06-27 01:18:07 [INFO]: Blockchain service cleanup completed {
+  "service": "trustflow-agent"
+}
+2025-06-27 01:18:07 [INFO]: [STARTUP] Agent service stopped {
+  "service": "trustflow-agent"
+}
+2025-06-27 01:18:07 [INFO]: Blockchain service cleanup completed {
+  "service": "trustflow-agent"
+}
